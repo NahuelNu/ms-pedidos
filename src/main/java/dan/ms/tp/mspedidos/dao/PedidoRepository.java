@@ -14,4 +14,6 @@ public interface PedidoRepository extends MongoRepository<Pedido,String> {
 
     @Query("{'cliente.razonSocial': ?0, 'fecha': {$gte: ?1, $lte: ?2}}")
     List<Pedido> findByClienteFecha(String razonSocial, Instant startDate, Instant endDate);
+
+    
 }
