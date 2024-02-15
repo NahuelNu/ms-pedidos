@@ -2,7 +2,7 @@ package dan.ms.tp.mspedidos.services;
 
 import java.time.Instant;
 import java.util.ArrayList;
-
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +43,22 @@ public class PedidoServiceImpl implements PedidoService{
     @Override
     public ResponseEntity<Pedido> buscarPorId(String id) {
         return ResponseEntity.of(pedidoRepo.findById(id)); 
+    }
+
+    @Override
+    public ResponseEntity<List<Pedido>> buscarPorIdCliente(Integer idCliente) {
+        return ResponseEntity.ok(pedidoRepo.findByCliente(idCliente));
+    }
+
+    @Override
+    public ResponseEntity<List<Pedido>> buscarPorIdClienteYFechas(Integer idCliente, Instant fechaInicio,
+            Instant fechaFin) {
+        return ResponseEntity.ok(pedidoRepo.findByClienteFecha(idCliente, fechaInicio, fechaFin)) ;
+    }
+
+    @Override
+    public ResponseEntity<List<Pedido>> buscarPorFechas(Instant fechaInicio, Instant fechaFin) {
+        return ResponseEntity.ok(pedidoRepo.findByFecha(fechaInicio, fechaFin));
     }
     
 }

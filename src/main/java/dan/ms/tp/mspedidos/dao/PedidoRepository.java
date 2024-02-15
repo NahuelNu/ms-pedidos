@@ -10,10 +10,15 @@ import java.util.List;
 @Repository
 public interface PedidoRepository extends MongoRepository<Pedido,String> {
     
-    List<Pedido> findByClienteRazonSocial(String razonSocial);
+    // List<Pedido> findByClienteRazonSocial(String razonSocial);
 
-    @Query("{'cliente.razonSocial': ?0, 'fecha': {$gte: ?1, $lte: ?2}}")
-    List<Pedido> findByClienteFecha(String razonSocial, Instant startDate, Instant endDate);
+    @Query("{'cliente.id': ?0, 'fecha': {$gte: ?1, $lte: ?2}}")
+    List<Pedido> findByClienteFecha(Integer idCliente, Instant fechaInicio, Instant fechaFin);
 
+    @Query("{'cliente.id':?0}")
+    List<Pedido> findByCliente(Integer idCliente);
+
+    @Query("{'fecha': {$gte: ?0, $lte: ?1}}")
+    List<Pedido> findByFecha(Instant fechaInicio, Instant fechaFin);
     
 }
