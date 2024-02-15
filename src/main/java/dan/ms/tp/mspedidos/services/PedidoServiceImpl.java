@@ -3,6 +3,7 @@ package dan.ms.tp.mspedidos.services;
 import java.time.Instant;
 import java.util.ArrayList;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,11 @@ public class PedidoServiceImpl implements PedidoService{
 
         pedidoRepo.save(pedido);
         return ResponseEntity.ok().body(pedido);
+    }
+
+    @Override
+    public ResponseEntity<Pedido> buscarPorId(String id) {
+        return ResponseEntity.of(pedidoRepo.findById(id)); 
     }
     
 }

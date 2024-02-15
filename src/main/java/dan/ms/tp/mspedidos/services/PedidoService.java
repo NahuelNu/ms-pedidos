@@ -8,5 +8,6 @@ import dan.ms.tp.mspedidos.modelo.Pedido;
 @Service
 public interface PedidoService {
     public ResponseEntity<Pedido>savePedido(Pedido pedido);
+    public ResponseEntity<Pedido>buscarPorId(String id);
     
 }
