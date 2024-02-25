@@ -66,7 +66,7 @@ public class PedidoServiceImpl implements PedidoService{
     @Override
     public ResponseEntity<Pedido> actualizar(String id) {
         Optional<Pedido> pedidoaActualizar = pedidoRepo.findById(id);
-        if (pedidoaActualizar!=null) {
+        if (pedidoaActualizar.isPresent()) {
             List<HistorialEstado> estadosPedido = pedidoaActualizar.get().getEstados();
             EstadoPedido estado = estadosPedido.get(estadosPedido.size()-1).getEstado();
             if (estado != EstadoPedido.RECHAZADO && estado != EstadoPedido.CANCELADO

@@ -54,7 +54,7 @@ public class PedidoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Pedido> actualizar(@RequestBody String id) {
+    public ResponseEntity<Pedido> actualizar(@PathVariable String id) {
         return pedidoService.actualizar(id);
     }
     
