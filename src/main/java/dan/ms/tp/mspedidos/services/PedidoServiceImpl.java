@@ -29,9 +29,9 @@ public class PedidoServiceImpl implements PedidoService{
         HistorialEstado historialEstado = new HistorialEstado();
         historialEstado.setFechaEstado(fechaActual);
 
-        // Falta lógica de setear Estado. Validar que no 
-        // total pedido > max cuenta corriente de cliente (dato a solicitar de ms-usuarios)
-        // stock solicitado de p > stock actual de p (dato a solicitar de ms-productos)
+        // Falta lógica de setear Estado. Validar que 
+        // total pedido < max cuenta corriente de cliente (dato a solicitar de ms-usuarios)
+        // stock solicitado de p < stock actual de p (dato a solicitar de ms-productos)
 
         pedido.setEstados(new ArrayList<>());
         pedido.getEstados().add(historialEstado);
