@@ -7,12 +7,17 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import dan.ms.tp.mspedidos.dao.PedidoRepository;
 import dan.ms.tp.mspedidos.modelo.EstadoPedido;
 import dan.ms.tp.mspedidos.modelo.HistorialEstado;
 import dan.ms.tp.mspedidos.modelo.Pedido;
+import io.netty.resolver.DefaultAddressResolverGroup;
+import reactor.netty.http.client.HttpClient;
 
 @Service
 public class PedidoServiceImpl implements PedidoService{
@@ -31,15 +36,32 @@ public class PedidoServiceImpl implements PedidoService{
         HistorialEstado historialEstado = new HistorialEstado();
         historialEstado.setFechaEstado(fechaActual);
 
-        // Falta lógica de setear Estado. Validar que no 
-        // total pedido > max cuenta corriente de cliente (dato a solicitar de ms-usuarios)
-        // stock solicitado de p > stock actual de p (dato a solicitar de ms-productos)
+        // Falta lógica de setear Estado. Validar que
+        // total pedido < max cuenta corriente de cliente (dato a solicitar de ms-usuarios)
+        // stock solicitado de p < stock actual de p (dato a solicitar de ms-productos)
+
+        //WebClient cta cte
+
+        WebClient ctaCteWebClient = WebClient.builder()
+        .clientConnector(new ReactorClientHttpConnector(
+            HttpClient.create().resolver(DefaultAddressResolverGroup.INSTANCE)
+        )).build();
+        final String url = "http://dan-gateway:8080/usuarios/api/cliente/ctaCte/" + pedido.getCliente().getId().toString();
+        Double maxCtaCte = ctaCteWebClient.get().uri(url).retrieve().bodyToMono(Double.class)
+        .block();
+        System.out.println("MAX cta cte: " + maxCtaCte.toString());
 
         pedido.setEstados(new ArrayList<>());
         pedido.getEstados().add(historialEstado);
 
-        pedidoRepo.save(pedido);
-        return ResponseEntity.ok().body(pedido);
+        if(pedido.getTotal() < maxCtaCte){
+            pedidoRepo.save(pedido);
+            return ResponseEntity.ok().body(pedido);
+
+        }
+        else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @Override
