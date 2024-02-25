@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dan.ms.tp.mspedidos.modelo.Pedido;
 import dan.ms.tp.mspedidos.services.PedidoService;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 @RestController
 @RequestMapping("api/pedido")
@@ -50,4 +52,11 @@ public class PedidoController {
         else if (fechaInicio != null & fechaFin != null) return pedidoService.buscarPorFechas(fechaInicio,fechaFin);
         else return ResponseEntity.badRequest().build();
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Pedido> actualizar(@RequestBody String id) {
+        return pedidoService.actualizar(id);
+    }
+    
+    
 }

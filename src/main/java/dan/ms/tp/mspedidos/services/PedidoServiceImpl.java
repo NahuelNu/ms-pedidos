@@ -3,12 +3,14 @@ package dan.ms.tp.mspedidos.services;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import dan.ms.tp.mspedidos.dao.PedidoRepository;
+import dan.ms.tp.mspedidos.modelo.EstadoPedido;
 import dan.ms.tp.mspedidos.modelo.HistorialEstado;
 import dan.ms.tp.mspedidos.modelo.Pedido;
 
@@ -59,6 +61,28 @@ public class PedidoServiceImpl implements PedidoService{
     @Override
     public ResponseEntity<List<Pedido>> buscarPorFechas(Instant fechaInicio, Instant fechaFin) {
         return ResponseEntity.ok(pedidoRepo.findByFecha(fechaInicio, fechaFin));
+    }
+
+    @Override
+    public ResponseEntity<Pedido> actualizar(String id) {
+        Optional<Pedido> pedidoaActualizar = pedidoRepo.findById(id);
+        if (pedidoaActualizar!=null) {
+            List<HistorialEstado> estadosPedido = pedidoaActualizar.get().getEstados();
+            EstadoPedido estado = estadosPedido.get(estadosPedido.size()-1).getEstado();
+            if (estado != EstadoPedido.RECHAZADO && estado != EstadoPedido.CANCELADO
+                && estado != EstadoPedido.EN_DISTRIBUCION && estado != EstadoPedido.ENTREGADO){
+                    HistorialEstado estadoNuevo = new HistorialEstado();
+                    estadoNuevo.setFechaEstado(Instant.now());
+                    estadoNuevo.setEstado(EstadoPedido.CANCELADO);
+                    estadoNuevo.setDetalle("Cliente cancela pedido");
+                    estadoNuevo.setUserEstado(pedidoaActualizar.get().getUser());
+                    pedidoaActualizar.get().getEstados().add(estadoNuevo);
+                    return ResponseEntity.ok(pedidoRepo.save(pedidoaActualizar.get())); 
+            }
+            // Que retornar cuándo el estado del pedido está mal?
+            else return ResponseEntity.badRequest().build();
+        }
+        else return ResponseEntity.notFound().build();
     }
     
 }
