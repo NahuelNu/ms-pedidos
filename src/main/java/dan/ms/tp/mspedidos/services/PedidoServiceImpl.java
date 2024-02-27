@@ -33,36 +33,70 @@ public class PedidoServiceImpl implements PedidoService{
         Double precioTotal = pedido.getDetallePedido().stream().mapToDouble(p->p.getTotal()).sum();
         pedido.setTotal(precioTotal);
 
-        HistorialEstado historialEstado = new HistorialEstado();
-        historialEstado.setFechaEstado(fechaActual);
-
         // Falta lógica de setear Estado. Validar que
         // total pedido < max cuenta corriente de cliente (dato a solicitar de ms-usuarios)
         // stock solicitado de p < stock actual de p (dato a solicitar de ms-productos)
 
         //WebClient cta cte
 
-        WebClient ctaCteWebClient = WebClient.builder()
+        WebClient webClient = WebClient.builder()
         .clientConnector(new ReactorClientHttpConnector(
             HttpClient.create().resolver(DefaultAddressResolverGroup.INSTANCE)
         )).build();
-        final String url = "http://dan-gateway:8080/usuarios/api/cliente/ctaCte/" + pedido.getCliente().getId().toString();
-        Double maxCtaCte = ctaCteWebClient.get().uri(url).retrieve().bodyToMono(Double.class)
-        .block();
+
+        final String urlCliente = "http://dan-gateway:8080/usuarios/api/cliente/ctaCte/"
+        + pedido.getCliente().getId().toString();
+
+        Double maxCtaCte = webClient.get()
+        .uri(urlCliente).retrieve().bodyToMono(Double.class).block();
         System.out.println("MAX cta cte: " + maxCtaCte.toString());
+        
+        //Instanciar estado
+        HistorialEstado historialEstado = new HistorialEstado();
+        historialEstado.setFechaEstado(fechaActual);
 
         pedido.setEstados(new ArrayList<>());
+
+        // Chequear que haya stock suficiente de cada producto
+
+        pedido.getDetallePedido().forEach((detalle) -> {
+            final String urlProductos = "http://dan-gateway:8080/productos/api/producto/"
+            + detalle.getProducto().getId();
+            Integer stockProd = webClient.get().uri(urlProductos).retrieve()
+            .bodyToFlux(Integer.class).blockLast();
+
+            Integer cantidadPedida = detalle.getCantidad();
+
+
+            if(stockProd < cantidadPedida){
+                if(historialEstado.getEstado() == null)
+                    historialEstado.setEstado(EstadoPedido.SIN_STOCK);
+                historialEstado.getDetalle().concat("Producto id: " + detalle.getProducto().getId().toString() +
+                ", Stock: " + stockProd.toString() + ", Cantidad Pedida: " + cantidadPedida.toString());
+            }
+
+
+            
+        });
+        
+        if(historialEstado.getEstado() == null){
+            
+            if(pedido.getTotal() < maxCtaCte)
+                historialEstado.setEstado(EstadoPedido.RECHAZADO);
+            else
+                historialEstado.setEstado(EstadoPedido.RECIBIDO);
+
+        }
+        else{
+            if(pedido.getTotal() < maxCtaCte)
+                historialEstado.setEstado(EstadoPedido.RECHAZADO);
+        } 
+
         pedido.getEstados().add(historialEstado);
-
-        if(pedido.getTotal() < maxCtaCte){
-            pedidoRepo.save(pedido);
-            return ResponseEntity.ok().body(pedido);
-
-        }
-        else {
-            return ResponseEntity.badRequest().build();
-        }
+        pedidoRepo.save(pedido);     
+        return ResponseEntity.ok(pedido);
     }
+    
 
     @Override
     public ResponseEntity<Pedido> buscarPorId(String id) {
