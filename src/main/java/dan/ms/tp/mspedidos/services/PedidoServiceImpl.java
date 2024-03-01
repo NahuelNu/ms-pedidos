@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -74,8 +73,6 @@ public class PedidoServiceImpl implements PedidoService{
                 historialEstado.getDetalle().concat("Producto id: " + detalle.getProducto().getId().toString() +
                 ", Stock: " + stockProd.toString() + ", Cantidad Pedida: " + cantidadPedida.toString());
             }
-
-
             
         });
         
@@ -85,7 +82,6 @@ public class PedidoServiceImpl implements PedidoService{
                 historialEstado.setEstado(EstadoPedido.RECHAZADO);
             else
                 historialEstado.setEstado(EstadoPedido.RECIBIDO);
-
         }
         else{
             if(pedido.getTotal() < maxCtaCte)
@@ -120,7 +116,7 @@ public class PedidoServiceImpl implements PedidoService{
     }
 
     @Override
-    public ResponseEntity<Pedido> actualizar(String id) {
+    public ResponseEntity<Pedido> actualizarACancelado(String id) {
         Optional<Pedido> pedidoaActualizar = pedidoRepo.findById(id);
         if (pedidoaActualizar.isPresent()) {
             List<HistorialEstado> estadosPedido = pedidoaActualizar.get().getEstados();

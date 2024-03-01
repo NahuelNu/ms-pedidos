@@ -16,6 +16,6 @@ public interface PedidoService {
     public ResponseEntity<List<Pedido>>buscarPorIdCliente(Integer idCliente);
     public ResponseEntity<List<Pedido>>buscarPorIdClienteYFechas(Integer idCliente, Instant fechaInicio, Instant fechaFin);
     public ResponseEntity<List<Pedido>>buscarPorFechas(Instant fechaInicio, Instant fechaFin);
-    public ResponseEntity<Pedido> actualizar(String id);
+    public ResponseEntity<Pedido> actualizarACancelado(String id);
     
 }

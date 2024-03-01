@@ -54,8 +54,8 @@ public class PedidoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Pedido> actualizar(@PathVariable String id) {
-        return pedidoService.actualizar(id);
+    public ResponseEntity<Pedido> actualizarACancelado(@PathVariable String id) {
+        return pedidoService.actualizarACancelado(id);
     }
     
     
